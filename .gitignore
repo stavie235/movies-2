@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Generated database
+*.db
+
+# OS / editor
+.DS_Store

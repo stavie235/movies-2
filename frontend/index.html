@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MovieLens App</title>
+  <link rel="stylesheet" href="index.css" />
+</head>
+<body>
+
+<header>
+  <h1>MovieLens Recommendation App</h1>
+</header>
+
+<main>
+
+  <!-- ── Section 1: Add a movie ───────────────────────────────────────── -->
+  <section class="card" id="section-add">
+    <h2>Add a Movie</h2>
+    <p style="font-size:.85rem;color:#64748b;margin-bottom:.8rem">
+      Add a new movie to the database. Separate genres with a pipe character, e.g. <code>Action|Drama</code>.
+    </p>
+    <div class="row">
+      <label for="add-title">Title</label>
+      <input type="text" id="add-title" placeholder="e.g. My New Movie (2025)" />
+    </div>
+    <div class="row">
+      <label for="add-genres">Genres</label>
+      <input type="text" id="add-genres" placeholder="e.g. Comedy|Drama" />
+    </div>
+    <div class="row">
+      <button id="btn-add">Add Movie</button>
+    </div>
+    <div class="msg" id="msg-add"></div>
+  </section>
+
+  <!-- ── Section 2: Search movies ─────────────────────────────────────── -->
+  <section class="card" id="section-search">
+    <h2>Search Movies</h2>
+    <p style="font-size:.85rem;color:#64748b;margin-bottom:.8rem">
+      Case-insensitive search by title. Leave blank to browse all movies.
+      Use <strong>Tags</strong> to view a movie's tags, or <strong>Delete</strong> to remove it.
+    </p>
+    <div class="row">
+      <label for="search-kw">Keyword</label>
+      <input type="text" id="search-kw" placeholder="e.g. Matrix" />
+      <button id="btn-search">Search</button>
+    </div>
+    <div class="msg" id="msg-search"></div>
+    <div class="table-wrap">
+      <table id="tbl-search" style="display:none">
+        <thead>
+          <tr><th>ID</th><th>Title</th><th>Genres</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="tbody-search"></tbody>
+      </table>
+    </div>
+    <!-- EXTENSION: tags gia tin epilegmeni tainía emfanizontai edw -->
+    <div id="tags-display" class="tags-box" style="display:none"></div>
+  </section>
+
+  <!-- ── Section 2b: Browse by genre (EXTENSION) ──────────────────────── -->
+  <section class="card" id="section-genre">
+    <h2>Browse by Genre</h2>
+    <p style="font-size:.85rem;color:#64748b;margin-bottom:.8rem">
+      Pick a genre to list every movie in that category. The dropdown is populated
+      from the database on page load.
+    </p>
+    <div class="row">
+      <label for="genre-select">Genre</label>
+      <select id="genre-select">
+        <option value="">— choose a genre —</option>
+      </select>
+      <button id="btn-genre">Filter</button>
+    </div>
+    <div class="msg" id="msg-genre"></div>
+    <div class="table-wrap">
+      <table id="tbl-genre" style="display:none">
+        <thead>
+          <tr><th>ID</th><th>Title</th><th>Genres</th></tr>
+        </thead>
+        <tbody id="tbody-genre"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── Section 3: Rate a movie ──────────────────────────────────────── -->
+  <section class="card" id="section-rate">
+    <h2>Rate a Movie (Session)</h2>
+    <p style="font-size:.85rem;color:#64748b;margin-bottom:.8rem">
+      Ratings are kept <strong>in browser memory only</strong> — they are not saved to the database.
+      They are sent to the recommendation engine when you request recommendations.
+    </p>
+    <div class="row">
+      <label for="rate-search">Movie</label>
+      <input type="text" id="rate-search" placeholder="Search movie title…" />
+      <button id="btn-rate-find">Find</button>
+    </div>
+    <div id="rate-results" class="inline-results"></div>
+    <div id="rate-selected" class="selected-badge" style="display:none"></div>
+    <div class="row">
+      <label for="rate-val">Rating</label>
+      <input type="number" id="rate-val" placeholder="0.5 – 5.0" min="0.5" max="5.0" step="0.5" />
+      <button id="btn-rate">Add Rating</button>
+    </div>
+    <div class="msg" id="msg-rate"></div>
+    <div id="session-list"></div>
+  </section>
+
+  <!-- ── Section 4: Movie average rating ──────────────────────────────── -->
+  <section class="card" id="section-avg">
+    <h2>Movie Average Rating</h2>
+    <p style="font-size:.85rem;color:#64748b;margin-bottom:.8rem">
+      Fetches all stored ratings for a movie and computes the average.
+    </p>
+    <div class="row">
+      <label for="avg-search">Movie</label>
+      <input type="text" id="avg-search" placeholder="Search movie title…" />
+      <button id="btn-avg-find">Find</button>
+    </div>
+    <div id="avg-results" class="inline-results"></div>
+    <div id="avg-selected" class="selected-badge" style="display:none"></div>
+    <div class="row">
+      <button id="btn-avg">Show Average</button>
+    </div>
+    <div class="msg" id="msg-avg"></div>
+  </section>
+
+  <!-- ── Section 5: Recommendations ──────────────────────────────────── -->
+  <section class="card" id="section-recs">
+    <h2>Recommendations</h2>
+    <p style="font-size:.85rem;color:#64748b;margin-bottom:.8rem">
+      Sends your in-memory session ratings to the recommendation engine.
+      You need at least one session rating before requesting recommendations.
+    </p>
+    <div class="row">
+      <button id="btn-recs">Get Recommendations</button>
+    </div>
+    <div class="msg" id="msg-recs"></div>
+    <div class="table-wrap">
+      <table id="tbl-recs" style="display:none">
+        <thead>
+          <tr><th>ID</th><th>Title</th><th>Genres</th><th>Predicted Rating</th></tr>
+        </thead>
+        <tbody id="tbody-recs"></tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<script src="index.js"></script>
+</body>
+</html>
