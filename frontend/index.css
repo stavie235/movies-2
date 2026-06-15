@@ -209,3 +209,17 @@ select:focus { outline: none; border-color: #4f7ef8; background: #fff; }
   border-radius: 999px;
   font-size: 0.8rem;
 }
+/* EXTENSION: add-tag input row inside the tags box */
+.add-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+.add-tag-row input {
+  flex: 0 1 220px;
+}
+.add-tag-row .msg {
+  margin-top: 0;
+  flex: 1;
+}

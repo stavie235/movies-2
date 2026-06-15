@@ -239,19 +239,62 @@ async function showTags(movieId, title) {
       return;
     }
 
-    const tags = data.tags;
-    if (tags.length === 0) {
-      box.textContent = `"${title}" has no tags yet.`;
-      return;
-    }
-
     // de-dup ta tags giati to idio tag mporei na to evale parapanw apo enas user
-    const unique = [...new Set(tags.map((t) => t.tag))];
-    box.innerHTML = `<strong>Tags for "${escHtml(title)}":</strong> `
-      + unique.map((t) => `<span class="tag-chip">${escHtml(t)}</span>`).join(" ");
+    const unique = [...new Set(data.tags.map((t) => t.tag))];
+    const chips  = unique.length
+      ? unique.map((t) => `<span class="tag-chip">${escHtml(t)}</span>`).join(" ")
+      : `<em>no tags yet</em>`;
+
+    // EXTENSION: ektos apo na deixnoume ta tags, dinoume kai input gia prosthiki
+    // neou tag (xtypaei to POST /tags) wste to feature na einai plires sto UI.
+    box.innerHTML =
+        `<div><strong>Tags for "${escHtml(title)}":</strong> ${chips}</div>`
+      + `<div class="add-tag-row">`
+      +   `<input type="text" id="add-tag-input" placeholder="new tag, e.g. sci-fi" />`
+      +   `<button id="btn-add-tag">Add Tag</button>`
+      +   `<span class="msg" id="msg-tag"></span>`
+      + `</div>`;
+
+    const input = document.getElementById("add-tag-input");
+    document.getElementById("btn-add-tag")
+      .addEventListener("click", () => addTag(movieId, title));
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") addTag(movieId, title);
+    });
+    input.focus();
 
   } catch (err) {
     box.textContent = `Network error: ${err.message}`;
+  }
+}
+
+
+// ── EXTENSION: add a tag to a movie ────────────────────────────────────────
+// xtypaei to POST /tags kai meta ksana-fortwnei to box gia na fanei to neo tag.
+// to timestamp to vazei o server, oxi o client (referential integrity + trust).
+async function addTag(movieId, title) {
+  const tag = document.getElementById("add-tag-input").value.trim();
+  if (!tag) {
+    setMsg("msg-tag", "Type a tag first.", "err");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${BASE_URL}/tags`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ movieId: Number(movieId), tag }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      setMsg("msg-tag", `Error: ${apiErr(data)}`, "err");
+      return;
+    }
+    // epityxia — ksanazwgrafizoume to box wste na emfanistei to neo tag-chip
+    showTags(movieId, title);
+  } catch (err) {
+    setMsg("msg-tag", `Network error: ${err.message}`, "err");
   }
 }
 
